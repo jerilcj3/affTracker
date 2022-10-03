@@ -9,3 +9,47 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+//1 campaign will have multiple sessions
+//1 campaign will have multiple metrics
+model Campaign {
+  id              String    @id @default(cuid())
+  campID          String    @unique
+  campaign_name   String
+  ad_angle        String
+  traffic_source  String
+  created_date    DateTime  @default(now())
+  campaign_url    String
+  impressions     Int?      @default(0)
+  unique_sessions Int?      @default(0)
+  metrics         Metrics[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
+
+model Metrics {
+  id           String   @id @default(cuid())
+  sessionID    String
+  fingerprint  String
+  token        Json
+  created_date DateTime @default(now())
+  campID       String // @foreign key
+  campaign     Campaign @relation(fields: [campID], references: [campID])
+}
+
+model Paths {
+  id    String @id @default(cuid())
+  paths Json
+}
+
+model Routes {
+  id        String @id @default(cuid())
+  pageID    String
+  campID    String
+  sessionID String
+}
